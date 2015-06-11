@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<adapt_framework>
+    <bundle>
+        <label>Sessions</label>
+        <name>sessions</name>
+        <version>1.0.0</version>
+        <type>extension</type>
+        <namespace>/extensions/sessions</namespace>
+        <description>Provides session management.</description>
+        <copyright>2015 Adapt Framework</copyright>
+        <license>MIT</license>
+        <website>http://www.adaptframework.com/documentation/extensions/sessions</website>
+        <depends_on>
+            <bundle>advanced_data_types</bundle>
+            <bundle>forms</bundle>
+        </depends_on>
+        <settings>
+            <category name="Sessions">
+                <setting>
+                    <name>sessions.expires</name>
+                    <label>How long should a session last in minutes, 0 = forever</label>
+                    <default_value>15</default_value>
+                </setting>
+                
+            </category>
+        </settings>
+    </bundle>
+</adapt_framework>
