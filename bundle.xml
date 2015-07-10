@@ -12,7 +12,6 @@
         <website>http://www.adaptframework.com/documentation/extensions/sessions</website>
         <depends_on>
             <bundle>advanced_data_types</bundle>
-            <bundle>forms</bundle>
         </depends_on>
         <settings>
             <category name="Sessions">
