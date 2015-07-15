@@ -46,6 +46,7 @@ namespace extensions\sessions{
             $this->date_accessed = new \frameworks\adapt\sql('now()', $this->data_source);
             $this->save();
             
+            
             //TODO: Invalidate old sessions
             
             /* Send the cookie */
