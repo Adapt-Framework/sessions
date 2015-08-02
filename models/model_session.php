@@ -53,6 +53,10 @@ namespace extensions\sessions{
             $this->cookie('session_key', $this->session_key);
         }
         
+        public function __wakeup(){
+            
+        }
+        
         /* Over-ride the initialiser to auto load children */
         public function initialise(){
             /* We must initialise first! */
