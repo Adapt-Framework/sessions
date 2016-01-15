@@ -1,6 +1,6 @@
 <?php
 
-namespace extensions\sessions{
+namespace adapt\sessions{
     
     /* Prevent direct access */
     defined('ADAPT_STARTED') or die;
@@ -43,7 +43,7 @@ namespace extensions\sessions{
                 $this->session_key = md5(time() . rand(1, 999999));
             }
             
-            $this->date_accessed = new \frameworks\adapt\sql('now()', $this->data_source);
+            $this->date_accessed = new \adapt\sql('now()', $this->data_source);
             $this->save();
             
             
@@ -89,14 +89,14 @@ namespace extensions\sessions{
                     /* Do we have a date_deleted field? */
                     if (in_array('date_deleted', $fields)){
                         
-                        $name_condition = new \frameworks\adapt\sql_condition(new \frameworks\adapt\sql('session_key'), '=', $key);
-                        $date_deleted_condition = new \frameworks\adapt\sql_condition(new\frameworks\adapt\sql('date_deleted'), 'is', new \frameworks\adapt\sql('null'));
+                        $name_condition = new \adapt\sql_condition(new \adapt\sql('session_key'), '=', $key);
+                        $date_deleted_condition = new \adapt\sql_condition(new\adapt\sql('date_deleted'), 'is', new \adapt\sql('null'));
                         
-                        $sql->where(new \frameworks\adapt\sql_and($name_condition, $date_deleted_condition));
+                        $sql->where(new \adapt\sql_and($name_condition, $date_deleted_condition));
                         
                     }else{
                         
-                        $sql->where(new \frameworks\adapt\sql_condition(new \frameworks\adapt\sql('session_key'), '=', $key));
+                        $sql->where(new \adapt\sql_condition(new \adapt\sql('session_key'), '=', $key));
                     }
                     
                     /* Get the results */
@@ -126,7 +126,7 @@ namespace extensions\sessions{
             $children = $this->get();
             
             foreach($children as $child){
-                if ($child instanceof \frameworks\adapt\model && $child->table_name == 'session_data'){
+                if ($child instanceof \adapt\model && $child->table_name == 'session_data'){
                     if ($child->session_data_key == $key){
                         $child->delete();
                     }
@@ -142,7 +142,7 @@ namespace extensions\sessions{
             
             if (is_null($value)){
                 foreach($children as $child){
-                    if ($child instanceof \frameworks\adapt\model && $child->table_name == 'session_data'){
+                    if ($child instanceof \adapt\model && $child->table_name == 'session_data'){
                         if ($child->session_data_key == $key){
                             if ($child->is_serialized == 'Yes'){
                                 return unserialize($child->data);
@@ -155,7 +155,7 @@ namespace extensions\sessions{
                 
             }else{
                 foreach($children as $child){
-                    if ($child instanceof \frameworks\adapt\model && $child->table_name == 'session_data'){
+                    if ($child instanceof \adapt\model && $child->table_name == 'session_data'){
                         if ($child->session_data_key == $key){
                             if (is_object($value) || is_array($value)){
                                 $child->data = serialize($value);
@@ -180,7 +180,6 @@ namespace extensions\sessions{
                     $setting->is_serialized = 'No';
                     $setting->data = $value;
                 }
-                $this->dom->add(new html_pre(print_r($setting->to_hash(), true)));
                 
                 $this->add($setting);
             }

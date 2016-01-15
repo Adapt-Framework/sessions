@@ -5,14 +5,74 @@
         <name>sessions</name>
         <version>1.0.0</version>
         <type>extension</type>
-        <namespace>/extensions/sessions</namespace>
+        <namespace>\adapt\sessions</namespace>
         <description>Provides session management.</description>
         <copyright>2015 Adapt Framework</copyright>
         <license>MIT</license>
         <website>http://www.adaptframework.com/documentation/extensions/sessions</website>
         <depends_on>
-            <bundle>advanced_data_types</bundle>
+            <bundle>
+                <name>advanced_data_types</name>
+                <version>1.0</version>
+            </bundle>
+            <bundle>
+                <name>adapt</name>
+                <version>1.0</version>
+            </bundle>
         </depends_on>
+        <schema>
+            <add>
+                <table name="session">
+                    <field name="session_id" key="primary" auto-increment="Yes">
+                        <data_type>bigint</data_type>
+                        <label>Session #</label>
+                    </field>
+                    <field name="session_key" index="Yes" index-size="64">
+                        <data_type>varchar</data_type>
+                        <max_length>128</max_length>
+                        <nullable>No</nullable>
+                        <label>Session key</label>
+                    </field>
+                    <field name="ip4_address">
+                        <data_type>ip4</data_type>
+                        <label>IP v4 Address</label>
+                    </field>
+                    <field name="ip6_address">
+                        <data_type>ip6</data_type>
+                        <label>IP v6 Address</label>
+                    </field>
+                    <field name="user_agent">
+                        <data_type>text</data_type>
+                        <label>User agent string</label>
+                    </field>
+                </table>
+                <table name="session_data">
+                    <field name="session_data_id" key="primary" auto-increment="Yes">
+                        <data_type>bigint</data_type>
+                        <label>Session data #</label>
+                    </field>
+                    <field name="session_id" key="foreign" referenced-table-name="session" referenced-field-name="session_id">
+                        <data_type>bigint</data_type>
+                        <label>Session #</label>
+                    </field>
+                    <field name="session_data_key" index="Yes" index-size="64">
+                        <data_type>varchar</data_type>
+                        <max_length>64</max_length>
+                        <nullable>No</nullable>
+                        <label>Key</label>
+                    </field>
+                    <field name="data">
+                        <data_type>text</data_type>
+                        <label>Data</label>
+                    </field>
+                    <field name="is_serialize">
+                        <data_type>enum('Yes', 'No')</data_type>
+                        <default_value>Yes</default_value>
+                        <label>Is the data serialized?</label>
+                    </field>
+                </table>
+            </add>
+        </schema>
         <settings>
             <category name="Sessions">
                 <setting>
@@ -20,7 +80,6 @@
                     <label>How long should a session last in minutes, 0 = forever</label>
                     <default_value>15</default_value>
                 </setting>
-                
             </category>
         </settings>
     </bundle>

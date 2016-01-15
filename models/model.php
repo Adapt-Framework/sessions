@@ -1,11 +1,11 @@
 <?php
 
-namespace extensions\sessions{
+namespace adapt\sessions{
     
     /* Prevent direct access */
     defined('ADAPT_STARTED') or die;
     
-    class model extends \frameworks\adapt\model{
+    class model extends \adapt\model{
         
     }
     
