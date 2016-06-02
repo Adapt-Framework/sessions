@@ -17,7 +17,7 @@
             </bundle>
             <bundle>
                 <name>adapt</name>
-                <version>1.0</version>
+                <version>2.0</version>
             </bundle>
         </depends_on>
         <schema>
@@ -44,6 +44,10 @@
                     <field name="user_agent">
                         <data_type>text</data_type>
                         <label>User agent string</label>
+                    </field>
+                    <field name="date_accessed">
+                        <data_type>datetime</data_type>
+                        <label>Date last accessed</label>
                     </field>
                 </table>
                 <table name="session_data">

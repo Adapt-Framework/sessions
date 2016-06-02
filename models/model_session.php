@@ -43,7 +43,7 @@ namespace adapt\sessions{
                 $this->session_key = md5(time() . rand(1, 999999));
             }
             
-            $this->date_accessed = new \adapt\sql('now()', $this->data_source);
+            $this->date_accessed = new sql_now();
             $this->save();
             
             
@@ -89,14 +89,14 @@ namespace adapt\sessions{
                     /* Do we have a date_deleted field? */
                     if (in_array('date_deleted', $fields)){
                         
-                        $name_condition = new \adapt\sql_condition(new \adapt\sql('session_key'), '=', $key);
-                        $date_deleted_condition = new \adapt\sql_condition(new\adapt\sql('date_deleted'), 'is', new \adapt\sql('null'));
+                        $name_condition = new sql_cond('session_key', sql::EQUALS, sql::q($key));
+                        $date_deleted_condition = new sql_cond('date_deleted', sql::IS, new sql_null());
                         
-                        $sql->where(new \adapt\sql_and($name_condition, $date_deleted_condition));
+                        $sql->where(new sql_and($name_condition, $date_deleted_condition));
                         
                     }else{
                         
-                        $sql->where(new \adapt\sql_condition(new \adapt\sql('session_key'), '=', $key));
+                        $sql->where(new sql_cond('session_key', sql::EQUALS, sql::q($key)));
                     }
                     
                     /* Get the results */
