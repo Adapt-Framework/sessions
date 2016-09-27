@@ -40,7 +40,7 @@ namespace adapt\sessions{
                 $this->user_agent = $_SERVER['HTTP_USER_AGENT'];
                 
                 /* Set the key */
-                $this->session_key = md5(time() . rand(1, 999999));
+                $this->session_key = md5(time() . rand(1, 999999) . $address . $this->user_agent);
             }
             
             $this->date_accessed = new sql_now();
