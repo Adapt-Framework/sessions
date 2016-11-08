@@ -14,7 +14,9 @@ namespace adapt\sessions{
             
             if (!$this->is_loaded){
                 /* Do we have a session id? */
-                $session_key = $this->cookie('session_key');
+                if ($this->setting('session.set_cookie') == 'Yes'){
+                    $session_key = $this->cookie('session_key');
+                }
                 
                 if (!is_null($session_key)){
                     $this->load_by_session_key($session_key);
@@ -50,7 +52,9 @@ namespace adapt\sessions{
             //TODO: Invalidate old sessions
             
             /* Send the cookie */
-            $this->cookie('session_key', $this->session_key);
+            if ($this->setting('sessions.set_cookie') == 'Yes'){
+                $this->cookie('session_key', $this->session_key);
+            }
         }
         
         public function __wakeup(){
