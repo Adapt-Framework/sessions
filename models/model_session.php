@@ -104,7 +104,7 @@ namespace adapt\sessions{
                     }
                     
                     /* Get the results */
-                    $results = $sql->execute()->results();
+                    $results = $sql->execute(0)->results();
                     
                     if (count($results) == 1){
                         $this->trigger(self::EVENT_ON_LOAD_BY_NAME);
