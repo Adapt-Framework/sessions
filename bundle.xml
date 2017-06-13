@@ -84,7 +84,7 @@
                 <setting>
                     <name>sessions.expires</name>
                     <label>How long should a session last in minutes, 0 = forever</label>
-                    <default_value>15</default_value>
+                    <default_value>0</default_value>
                 </setting>
                 <setting>
                     <name>sessions.set_cookie</name>
