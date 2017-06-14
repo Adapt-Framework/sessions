@@ -48,9 +48,6 @@ namespace adapt\sessions{
             $this->date_accessed = new sql_now();
             $this->save();
             
-            
-            //TODO: Invalidate old sessions
-            
             /* Send the cookie */
             if ($this->setting('sessions.set_cookie') == 'Yes'){
                 $this->cookie('session_key', $this->session_key);
@@ -77,6 +74,7 @@ namespace adapt\sessions{
         
         public function load_by_session_key($key){
             $this->initialise();
+            $session_expires = $this->setting('sessions.expires') ?: 0;
             
             /* Make sure name is set */
             if (isset($key)){
@@ -87,8 +85,13 @@ namespace adapt\sessions{
                 if (in_array('session_key', $fields)){
                     $sql = $this->data_source->sql;
                     
-                    $sql->select('*')
-                        ->from($this->table_name);
+                    if ($session_expires){
+                        $sql->select("*, if (date_accessed > now() - interval {$session_expires} minute, 'Valid', 'Invalid') as valid");
+                    }else{
+                        $sql->select("*");
+                    }
+                    
+                    $sql->from($this->table_name);
                     
                     /* Do we have a date_deleted field? */
                     if (in_array('date_deleted', $fields)){
@@ -101,6 +104,10 @@ namespace adapt\sessions{
                     }else{
                         
                         $sql->where(new sql_cond('session_key', sql::EQUALS, sql::q($key)));
+                    }
+                    
+                    if ($session_expires){
+                        $sql->having(new sql_cond('valid', sql::EQUALS, q('Valid')));
                     }
                     
                     /* Get the results */
@@ -125,6 +132,22 @@ namespace adapt\sessions{
             return false;
         }
         
+        public function load_by_data($data = array()) {
+            if (parent::load_by_data($data)){
+                
+                $now = $this->data_source->sql
+                    ->select('now() as n')
+                    ->execute()
+                    ->results()[0]['n'];
+                
+                $this->date_accessed = $now;
+                $this->save();
+                
+                return true;
+            }
+            
+            return false;
+        }
         
         public function remove_data($key){
             $children = $this->get();
