@@ -103,40 +103,6 @@ namespace adapt\sessions{
                     );
                 
                 $results = $sql->execute(0)->results();
-//                
-//                /* We need to check this table has a session_key field */
-//                $fields = array_keys($this->_data);
-//                
-//                if (in_array('session_key', $fields)){
-//                    $sql = $this->data_source->sql;
-//                    
-//                    if ($session_expires){
-//                        $sql->select("*, if (date_accessed > now() - interval {$session_expires} minute, 'Valid', 'Invalid') as valid");
-//                    }else{
-//                        $sql->select("*");
-//                    }
-//                    
-//                    $sql->from($this->table_name);
-//                    
-//                    /* Do we have a date_deleted field? */
-//                    if (in_array('date_deleted', $fields)){
-//                        
-//                        $name_condition = new sql_cond('session_key', sql::EQUALS, sql::q($key));
-//                        $date_deleted_condition = new sql_cond('date_deleted', sql::IS, new sql_null());
-//                        
-//                        $sql->where(new sql_and($name_condition, $date_deleted_condition));
-//                        
-//                    }else{
-//                        
-//                        $sql->where(new sql_cond('session_key', sql::EQUALS, sql::q($key)));
-//                    }
-//                    
-//                    if ($session_expires){
-//                        $sql->having(new sql_cond('valid', sql::EQUALS, q('Valid')));
-//                    }
-//                    
-//                    /* Get the results */
-//                    $results = $sql->execute(0)->results();
                     
                     if (count($results) == 1){
                         $this->trigger(self::EVENT_ON_LOAD_BY_NAME);
