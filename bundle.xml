@@ -50,9 +50,17 @@
                         <data_type>text</data_type>
                         <label>User agent string</label>
                     </field>
+                    <field name="session_timeout">
+                        <data_type>int</data_type>
+                        <label>How long should the session last, in minutes?</label>
+                    </field>
                     <field name="date_accessed">
                         <data_type>datetime</data_type>
                         <label>Date last accessed</label>
+                    </field>
+                    <field name="date_expires">
+                        <data_type>datetime</data_type>
+                        <label>Date the session is due to expire</label>
                     </field>
                 </table>
                 <table name="session_data">
