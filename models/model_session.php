@@ -12,6 +12,8 @@ namespace adapt\sessions{
         public function __construct($id = null){
             parent::__construct('session', $id);
             
+            $this->delete_expired_sessions();
+            
             if (!$this->is_loaded){
                 /* Do we have a session id? */
                 if ($this->setting('session.set_cookie') == 'Yes'){
@@ -43,6 +45,16 @@ namespace adapt\sessions{
                 
                 /* Set the key */
                 $this->session_key = md5(time() . rand(1, 999999) . guid() . $address . $this->user_agent);
+                
+                /* Set the session expiry time (if required) */
+                $session_timeout = $this->bundles->setting('sessions.expires');
+                
+                if (!$session_timeout){
+                    $session_timeout = 60 * 24 * 365;
+                }
+                
+                $this->session_timeout = $session_timeout;
+                $this->date_expires = $this->data_source->sql->select("now() + interval {$session_timeout} minute as x")->execute(0)->results()[0]['x'];
             }
             
             $this->date_accessed = new sql_now();
@@ -79,39 +91,52 @@ namespace adapt\sessions{
             /* Make sure name is set */
             if (isset($key)){
                 
-                /* We need to check this table has a session_key field */
-                $fields = array_keys($this->_data);
+                $sql = $this->data_source->sql;
+                $sql->select('*')
+                    ->from('session')
+                    ->where(
+                        new sql_and(
+                            new sql_cond('session_key', sql::EQUALS, q($key)),
+                            new sql_cond('date_deleted', sql::IS, sql::NULL),
+                            new sql_cond('date_expires', sql::GREATER_THAN_OR_EQUALS, new sql_now())
+                        )
+                    );
                 
-                if (in_array('session_key', $fields)){
-                    $sql = $this->data_source->sql;
-                    
-                    if ($session_expires){
-                        $sql->select("*, if (date_accessed > now() - interval {$session_expires} minute, 'Valid', 'Invalid') as valid");
-                    }else{
-                        $sql->select("*");
-                    }
-                    
-                    $sql->from($this->table_name);
-                    
-                    /* Do we have a date_deleted field? */
-                    if (in_array('date_deleted', $fields)){
-                        
-                        $name_condition = new sql_cond('session_key', sql::EQUALS, sql::q($key));
-                        $date_deleted_condition = new sql_cond('date_deleted', sql::IS, new sql_null());
-                        
-                        $sql->where(new sql_and($name_condition, $date_deleted_condition));
-                        
-                    }else{
-                        
-                        $sql->where(new sql_cond('session_key', sql::EQUALS, sql::q($key)));
-                    }
-                    
-                    if ($session_expires){
-                        $sql->having(new sql_cond('valid', sql::EQUALS, q('Valid')));
-                    }
-                    
-                    /* Get the results */
-                    $results = $sql->execute(0)->results();
+                $results = $sql->execute(0)->results();
+//                
+//                /* We need to check this table has a session_key field */
+//                $fields = array_keys($this->_data);
+//                
+//                if (in_array('session_key', $fields)){
+//                    $sql = $this->data_source->sql;
+//                    
+//                    if ($session_expires){
+//                        $sql->select("*, if (date_accessed > now() - interval {$session_expires} minute, 'Valid', 'Invalid') as valid");
+//                    }else{
+//                        $sql->select("*");
+//                    }
+//                    
+//                    $sql->from($this->table_name);
+//                    
+//                    /* Do we have a date_deleted field? */
+//                    if (in_array('date_deleted', $fields)){
+//                        
+//                        $name_condition = new sql_cond('session_key', sql::EQUALS, sql::q($key));
+//                        $date_deleted_condition = new sql_cond('date_deleted', sql::IS, new sql_null());
+//                        
+//                        $sql->where(new sql_and($name_condition, $date_deleted_condition));
+//                        
+//                    }else{
+//                        
+//                        $sql->where(new sql_cond('session_key', sql::EQUALS, sql::q($key)));
+//                    }
+//                    
+//                    if ($session_expires){
+//                        $sql->having(new sql_cond('valid', sql::EQUALS, q('Valid')));
+//                    }
+//                    
+//                    /* Get the results */
+//                    $results = $sql->execute(0)->results();
                     
                     if (count($results) == 1){
                         $this->trigger(self::EVENT_ON_LOAD_BY_NAME);
@@ -122,9 +147,9 @@ namespace adapt\sessions{
                         $this->error(count($results) . " records found with a session_key of '{$key}'.");
                     }
                     
-                }else{
-                    $this->error('Unable to load by name, this table has no \'session_key\' field.');
-                }
+                //}else{
+                //    $this->error('Unable to load by name, this table has no \'session_key\' field.');
+                //}
             }else{
                 $this->error('Unable to load by session_key, no session_key supplied');
             }
@@ -135,12 +160,13 @@ namespace adapt\sessions{
         public function load_by_data($data = array()) {
             if (parent::load_by_data($data)){
                 
-                $now = $this->data_source->sql
-                    ->select('now() as n')
+                $results = $this->data_source->sql
+                    ->select('now() as n', "now() + interval {$this->session_timeout} minute as e")
                     ->execute()
-                    ->results()[0]['n'];
+                    ->results()[0];
                 
-                $this->date_accessed = $now;
+                $this->date_accessed = $results['n'];
+                $this->date_expires = $results['e'];
                 $this->save();
                 
                 return true;
@@ -214,8 +240,20 @@ namespace adapt\sessions{
             return null;
         }
         
+        public function delete_expired_sessions(){
+            $sql = $this->data_source->sql;
+            $sql->update('session')
+                ->set('date_deleted', new sql_now())
+                ->where(
+                    new sql_and(
+                        new sql_cond('date_expires', sql::LESS_THAN, new sql_now()),
+                        new sql_cond('date_deleted', sql::IS, sql::NULL)
+                    )
+                )
+                ->execute(0);
+        }
+        
     }
     
 }
 
-?>
